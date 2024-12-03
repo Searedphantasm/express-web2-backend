@@ -3,7 +3,7 @@ const db = require('better-sqlite3')('web-2-backend.db', {verbose: console.log})
 
 function initDb() {
 
-    db.prepare(`CREATE TABLE customers (
+    db.prepare(`CREATE TABLE IF NOT EXISTS customers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Unique customer ID
     first_name TEXT NOT NULL,              -- First name of the customer
     last_name TEXT NOT NULL,               -- Last name of the customer
@@ -14,7 +14,7 @@ function initDb() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Record creation timestamp
     );`).run()
 
-    db.prepare(`CREATE TABLE users (
+    db.prepare(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Unique customer ID
     first_name TEXT NOT NULL,              -- First name of the user
     last_name TEXT NOT NULL,               -- Last name of the user
@@ -25,7 +25,7 @@ function initDb() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Record creation timestamp
     );`).run()
 
-    db.prepare(`CREATE TABLE products (
+    db.prepare(`CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,  -- Unique product ID
     title TEXT NOT NULL,                    -- Product title
     description TEXT,                      -- Product description (optional)
@@ -34,7 +34,7 @@ function initDb() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Record creation timestamp
     );`).run()
 
-    db.prepare(`CREATE TABLE cart (
+    db.prepare(`CREATE TABLE IF NOT EXISTS cart (
     id INTEGER PRIMARY KEY AUTOINCREMENT,   -- Unique cart ID
     customer_id INTEGER NOT NULL,           -- Reference to the customer
     status TEXT DEFAULT 'open',             -- Status (e.g., 'open', 'completed')
@@ -42,7 +42,7 @@ function initDb() {
     FOREIGN KEY (customer_id) REFERENCES customers(id)  -- Foreign key to customers table
     );`).run()
 
-    db.prepare(`CREATE TABLE cart_items (
+    db.prepare(`CREATE TABLE IF NOT EXISTS cart_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,   -- Unique cart item ID
     cart_id INTEGER NOT NULL,               -- Reference to the cart
     product_id INTEGER NOT NULL,            -- Reference to the product
@@ -52,7 +52,7 @@ function initDb() {
     FOREIGN KEY (product_id) REFERENCES products(id)               -- Link to product
     );`).run()
 
-    db.prepare(`CREATE TABLE purchases (
+    db.prepare(`CREATE TABLE IF NOT EXISTS purchases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,   -- Unique purchase ID
     cart_id INTEGER NOT NULL,               -- Reference to the cart
     price REAL NOT NULL,                    -- Total price of the purchase
@@ -62,17 +62,21 @@ function initDb() {
 }
 
 function dummyData() {
-    db.prepare(`INSERT INTO products (title, description, price, quantity_in_stock) 
+    try{
+        db.prepare(`INSERT INTO products (title, description, price, quantity_in_stock) 
     VALUES 
     ('Wireless Mouse', 'Ergonomic wireless mouse with adjustable DPI.', 29.99, 50),
     ('Mechanical Keyboard', 'RGB-backlit mechanical keyboard with blue switches.', 79.99, 30);
     `).run()
 
-    db.prepare(`INSERT INTO customers (first_name, last_name, email, phone, address,hashed_password) 
+        db.prepare(`INSERT INTO customers (first_name, last_name, email, phone, address,hashed_password) 
     VALUES 
         ('John', 'Doe', 'john.doe@example.com', '123-456-7890', '123 Elm Street, Springfield','rgmdslkfgmldskfgmpseorgj'),
         ('Jane', 'Smith', 'jane.smith@example.com', '987-654-3210', '456 Oak Avenue, Metropolis','sgmdslkfgmldskmfgslkdfmg');
     `).run()
+    }catch (e) {
+        console.log(e)
+    }
 }
 
 
